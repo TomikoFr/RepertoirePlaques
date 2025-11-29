@@ -5,57 +5,107 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Répertoire Plaques</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    input, button { padding: 10px; font-size: 16px; }
-    #list { margin-top: 20px; }
-    .item { padding: 8px; border-bottom: 1px solid #ccc; }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input, button { padding: 10px; margin: 5px 0; width: 100%; }
+    .container { max-width: 400px; margin: auto; }
+    .item { padding: 10px; border: 1px solid #ccc; margin-top: 10px; border-radius: 5px; }
   </style>
 </head>
 <body>
-  <h1>Répertoire des plaques</h1>
-  <input id="plateInput" placeholder="Entre une plaque"> 
-  <button onclick="addPlate()">Ajouter</button>
+  <div class="container">
+    <h2>Ajouter une plaque</h2>
 
-  <div id="list"></div>
+    <label>Couleur</label>
+    <input type="text" id="couleur" />
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, addDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <label>Date</label>
+    <input type="date" id="date" />
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAFXsHbbtdQjT3xebw9cehUytV46S9qO1g",
-      authDomain: "repertoireplaques.firebaseapp.com",
-      projectId: "repertoireplaques",
-      storageBucket: "repertoireplaques.firebasestorage.app",
-      messagingSenderId: "1007663760164",
-      appId: "1:1007663760164:web:327a6baf74020612c469b1",
-      measurementId: "G-TC8MRJLGE3"
-    };
+    <label>Plaque</label>
+    <input type="text" id="plaque" />
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    <label>Propriétaire</label>
+    <input type="text" id="proprio" />
 
-    async function loadPlates() {
-      const snapshot = await getDocs(collection(db, "plates"));
-      const list = document.getElementById("list");
-      list.innerHTML = "";
-      snapshot.forEach((doc) => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.textContent = doc.data().number;
-        list.appendChild(div);
+    <label>Véhicule</label>
+    <input type="text" id="vehicule" />
+
+    <button id="saveBtn">Enregistrer</button>
+
+    <h2>Liste des plaques</h2>
+    <div id="list"></div>
+  </div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAFXsHbbtdQjT3xebw9cehUytV46S9qO1g",
+    authDomain: "repertoireplaques.firebaseapp.com",
+    projectId: "repertoireplaques",
+    storageBucket: "repertoireplaques.firebasestorage.app",
+    messagingSenderId: "1007663760164",
+    appId: "1:1007663760164:web:327a6baf74020612c469b1",
+    measurementId: "G-TC8MRJLGE3"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const saveBtn = document.getElementById("saveBtn");
+  const list = document.getElementById("list");
+
+  async function savePlaque() {
+    const couleur = document.getElementById("couleur").value;
+    const date = document.getElementById("date").value;
+    const plaque = document.getElementById("plaque").value;
+    const proprio = document.getElementById("proprio").value;
+    const vehicule = document.getElementById("vehicule").value;
+
+    if (!plaque) {
+      alert("La plaque est obligatoire");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "plaques"), {
+        couleur,
+        date,
+        plaque,
+        proprio,
+        vehicule
       });
+      alert("Plaque enregistrée !");
+      loadPlaques();
+    } catch (e) {
+      alert("Erreur : " + e.message);
     }
+  }
 
-    async function addPlate() {
-      const input = document.getElementById("plateInput");
-      if (!input.value.trim()) return;
-      await addDoc(collection(db, "plates"), { number: input.value.trim() });
-      input.value = "";
-      loadPlates();
-    }
+  async function loadPlaques() {
+    list.innerHTML = "Chargement...";
+    const querySnapshot = await getDocs(collection(db, "plaques"));
+    list.innerHTML = "";
 
-    loadPlates();
-  </script>
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const div = document.createElement("div");
+      div.className = "item";
+      div.innerHTML = `
+        <b>Plaque :</b> ${data.plaque}<br>
+        <b>Proprio :</b> ${data.proprio}<br>
+        <b>Véhicule :</b> ${data.vehicule}<br>
+        <b>Couleur :</b> ${data.couleur}<br>
+        <b>Date :</b> ${data.date}
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  saveBtn.onclick = savePlaque;
+  loadPlaques();
+</script>
+
 </body>
 </html>
