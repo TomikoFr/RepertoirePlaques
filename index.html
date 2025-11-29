@@ -5,38 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Répertoire Plaques</title>
   <style>
-    body { font-family: Arial, sans-serif; background:#111; color:white; padding:20px; }
-    h1 { text-align:center; }
-    input { padding:8px; margin:5px; border-radius:5px; border:none; }
-    button { padding:10px 15px; margin:5px; background:#007bff; color:white; border:none; border-radius:5px; cursor:pointer; }
-    table { width:100%; margin-top:20px; border-collapse: collapse; }
-    th, td { padding:10px; border-bottom:1px solid #444; text-align:left; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, button { padding: 10px; font-size: 16px; }
+    #list { margin-top: 20px; }
+    .item { padding: 8px; border-bottom: 1px solid #ccc; }
   </style>
 </head>
 <body>
-  <h1>Répertoire de Plaques</h1>
+  <h1>Répertoire des plaques</h1>
+  <input id="plateInput" placeholder="Entre une plaque"> 
+  <button onclick="addPlate()">Ajouter</button>
 
-  <input id="plaque" placeholder="Plaque d'immatriculation">
-  <input id="vehicule" placeholder="Véhicule / Modèle">
-  <input id="couleur" placeholder="Couleur">
-  <input id="proprio" placeholder="Propriétaire">
-  <button onclick="ajouter()">Ajouter</button>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Plaque</th>
-        <th>Véhicule</th>
-        <th>Couleur</th>
-        <th>Propriétaire</th>
-      </tr>
-    </thead>
-    <tbody id="tableau"></tbody>
-  </table>
+  <div id="list"></div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, addDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAFXsHbbtdQjT3xebw9cehUytV46S9qO1g",
@@ -51,45 +35,27 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    async function ajouter() {
-      const plaque = document.getElementById('plaque').value;
-      const vehicule = document.getElementById('vehicule').value;
-      const couleur = document.getElementById('couleur').value;
-      const proprio = document.getElementById('proprio').value;
-
-      if (!plaque) return alert("La plaque est obligatoire");
-
-      await addDoc(collection(db, 'plaques'), {
-        plaque,
-        vehicule,
-        couleur,
-        proprio,
-        date: new Date()
-      });
-
-      charger();
-    }
-
-    async function charger() {
-      const tableau = document.getElementById('tableau');
-      tableau.innerHTML = '';
-
-      const q = query(collection(db, 'plaques'), orderBy('date', 'asc'));
-      const snapshot = await getDocs(q);
-
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${d.plaque}</td>
-          <td>${d.vehicule}</td>
-          <td>${d.couleur}</td>
-          <td>${d.proprio}</td>`;
-        tableau.appendChild(row);
+    async function loadPlates() {
+      const snapshot = await getDocs(collection(db, "plates"));
+      const list = document.getElementById("list");
+      list.innerHTML = "";
+      snapshot.forEach((doc) => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.textContent = doc.data().number;
+        list.appendChild(div);
       });
     }
 
-    charger();
+    async function addPlate() {
+      const input = document.getElementById("plateInput");
+      if (!input.value.trim()) return;
+      await addDoc(collection(db, "plates"), { number: input.value.trim() });
+      input.value = "";
+      loadPlates();
+    }
+
+    loadPlates();
   </script>
 </body>
 </html>
