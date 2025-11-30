@@ -15,10 +15,19 @@
   <div class="container">
     <h2>Ajouter une plaque</h2>
 
+    <label>Type de plaque</label>
+    <select id="type">
+      <option value="Classique">Classique</option>
+      <option value="Diplomatique">Diplomatique</option>
+      <option value="WW provisoire">WW provisoire</option>
+      <option value="Collection">Collection</option>
+      <option value="Police / Gendarmerie">Police / Gendarmerie</option>
+    </select>
+
     <label>Couleur</label>
     <input type="text" id="couleur" />
 
-    <label>Date</label>
+    <label>Date</label></label>
     <input type="date" id="date" />
 
     <label>Plaque</label>
@@ -74,7 +83,8 @@
         date,
         plaque,
         proprio,
-        vehicule
+        vehicule,
+        type: document.getElementById("type").value
       });
       alert("Plaque enregistrée !");
       loadPlaques();
@@ -93,6 +103,7 @@
       const div = document.createElement("div");
       div.className = "item";
       div.innerHTML = `
+        <b>Type :</b> ${data.type}<br>
         <b>Plaque :</b> ${data.plaque}<br>
         <b>Proprio :</b> ${data.proprio}<br>
         <b>Véhicule :</b> ${data.vehicule}<br>
