@@ -24,6 +24,34 @@
       <option value="Police / Gendarmerie">Police / Gendarmerie</option>
     </select>
 
+    <label>Département (plaque actuelle)</label>
+    <select id="departement" style="display:none">
+      <option value="">-- Sélectionner --</option>
+      <option value="01">01 - Ain</option>
+      <option value="02">02 - Aisne</option>
+      <option value="03">03 - Allier</option>
+      <option value="04">04 - Alpes-de-Haute-Provence</option>
+      <option value="05">05 - Hautes-Alpes</option>
+      <option value="06">06 - Alpes-Maritimes</option>
+      <option value="07">07 - Ardèche</option>
+      <option value="08">08 - Ardennes</option>
+      <option value="09">09 - Ariège</option>
+      <option value="10">10 - Aube</option>
+      <option value="11">11 - Aude</option>
+      <option value="12">12 - Aveyron</option>
+      <option value="13">13 - Bouches-du-Rhône</option>
+      <option value="14">14 - Calvados</option>
+      <option value="15">15 - Cantal</option>
+      <option value="16">16 - Charente</option>
+      <option value="17">17 - Charente-Maritime</option>
+      <option value="18">18 - Cher</option>
+      <option value="19">19 - Corrèze</option>
+      <option value="21">21 - Côte-d'Or</option>
+      <option value="22">22 - Côtes-d'Armor</option>
+      <option value="23">23 - Creuse</option>
+      <option value="24">24 - Dordogne</option>
+    </select>
+
     <label>Couleur</label>
     <input type="text" id="couleur" />
 
@@ -62,6 +90,15 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
+  // Affichage auto du sélecteur département
+  const typeSelect = document.getElementById("type");
+  const departSelect = document.getElementById("departement");
+
+  typeSelect.addEventListener("change", () => {
+    if (typeSelect.value === "Classique") departSelect.style.display = "block";
+    else departSelect.style.display = "none";
+  });
+
   const saveBtn = document.getElementById("saveBtn");
   const list = document.getElementById("list");
 
@@ -78,12 +115,16 @@
     }
 
     try {
+      const type = document.getElementById("type").value;
+      const departement = document.getElementById("departement").value;
       await addDoc(collection(db, "plaques"), {
         couleur,
         date,
         plaque,
         proprio,
         vehicule,
+        type,
+        departement
         type: document.getElementById("type").value
       });
       alert("Plaque enregistrée !");
@@ -108,6 +149,7 @@
         <b>Proprio :</b> ${data.proprio}<br>
         <b>Véhicule :</b> ${data.vehicule}<br>
         <b>Couleur :</b> ${data.couleur}<br>
+        <b>Département :</b> ${data.departement || "N/A"}<br>
         <b>Date :</b> ${data.date}
       `;
       list.appendChild(div);
